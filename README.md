@@ -1,211 +1,135 @@
-# @omnifyjp/omnify
+# @famgia/omnify
 
-Convert Omnify schema-lock.json to TypeScript models and enums.
+Complete Laravel + React solution: Schema-to-TypeScript generation + Runtime helpers for forms
 
-[![npm version](https://badge.fury.io/js/@omnifyjp%2Fomnify.svg)](https://www.npmjs.com/package/@omnifyjp/omnify)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+## Features
 
-A standalone code generator that reads Omnify schema files and generates TypeScript type definitions, enum constants, and React context providers.
+### 🎯 Build-time (Code Generation)
+- ✅ Convert Omnify `schema-lock.json` to TypeScript types
+- ✅ Generate enum types and options
+- ✅ Generate model interfaces with relations
+- ✅ Generate Enums Context Provider with type-safe helpers
+- ✅ Watch mode for auto-regeneration
+
+### 🚀 Runtime (React Helpers)
+- ✅ `useFormSubmit` - Auto Laravel validation error mapping
+- ✅ `createLaravelAxios` - Pre-configured axios for Laravel
+- ✅ `getCsrfCookie` - CSRF token helper
+- ✅ Full TypeScript support
 
 ## Installation
 
-### From npm
 ```bash
-npm install --save-dev @omnifyjp/omnify
-```
-
-### Local development (in monorepo)
-```json
-{
-  "dependencies": {
-    "@omnifyjp/omnify": "file:../packages/omnify"
-  }
-}
-```
-
-Then run:
-```bash
-npm install
+npm install @famgia/omnify
 ```
 
 ## Usage
 
-```bash
-omnify-build [--schema <path>] --output <output-directory> [--watch]
-```
-
-### Options
-
-- `--schema <path>` - Path to schema-lock.json file (optional, auto-detects from `.omnify/`)
-- `--output <dir>` - Output directory for generated files (required)
-- `--watch` - Watch for schema changes and rebuild automatically
-- `--help` - Show help message
-
-### Auto-detection
-
-If `--schema` is not provided, the tool will automatically search for `schema-lock.json` in:
-1. `../backend/.omnify/schema-lock.json` (from frontend directory)
-2. `./backend/.omnify/schema-lock.json` (from project root)
-3. `./.omnify/schema-lock.json` (current directory)
-
-### Examples
+### 1. Generate Types (Build-time)
 
 ```bash
-# Auto-detect schema from .omnify/ directory
-omnify-build --output src/omnify
+# In frontend project
+npx omnify-build --output src/omnify
 
-# Explicit schema path
-omnify-build --schema backend/.omnify/schema-lock.json --output src/omnify
-
-# Watch mode with auto-detection
-omnify-build --output src/omnify --watch
+# Watch mode
+npx omnify-build --output src/omnify --watch
 ```
 
-## Output Structure
-
-```
-output-dir/
-├── types/
-│   ├── enums.ts          # TypeScript enum union types
-│   ├── enumOptions.ts    # Enum constant objects
-│   ├── models.ts         # TypeScript interfaces
-│   └── index.ts
-├── contexts/
-│   ├── EnumsContext.tsx  # React context provider
-│   └── index.ts
-└── index.ts
-```
-
-## Package.json Scripts
-
-Add to your project's `package.json`:
-
-```json
-{
-  "scripts": {
-    "omnify:build": "omnify-build --output src/omnify",
-    "omnify:dev": "omnify-build --output src/omnify --watch"
-  }
-}
-```
-
-## Using Generated Types
+### 2. Use Generated Types & Enums
 
 ```typescript
-// Import types
-import { ApplicationForm } from '@/omnify/types';
-import type { Company_EntityType } from '@/omnify/types';
+import { User, Company } from '@/omnify/models';
+import { useEnums } from '@/omnify';
 
-// Import enum options
-import { entity_typeOptions, account_typeOptions } from '@/omnify/types';
-
-// Use in React
-function MySelect() {
-  return (
-    <select>
-      {Object.entries(entity_typeOptions).map(([value, label]) => (
-        <option key={value} value={value}>{label}</option>
-      ))}
-    </select>
-  );
-}
-
-// Import context provider
-import { EnumsProvider, useEnums } from '@/omnify/contexts';
-
-function App() {
-  return (
-    <EnumsProvider>
-      <YourApp />
-    </EnumsProvider>
-  );
-}
-
-function Component() {
-  const { enums } = useEnums();
-  return <div>{enums.entity_type.CORPORATION}</div>;
+function MyForm() {
+  const { getOptions, getPrefecturesAsNumbers } = useEnums();
+  
+  const accountTypeOptions = getOptions('ApplicationForm', 'account_type');
+  const prefectureOptions = getPrefecturesAsNumbers();
+  
+  return <Select options={accountTypeOptions} />;
 }
 ```
 
-## Features
+### 3. Use Runtime Helpers
 
-- ✅ Generates TypeScript interfaces from Omnify models
-- ✅ Creates enum union types
-- ✅ Generates enum constant objects for easy use
-- ✅ Creates React context provider with static enum data
-- ✅ Watch mode for development
-- ✅ Type-safe enum usage
-- ✅ No runtime dependencies (enums are static)
-- ✅ Standalone package - works with any project structure
-- ✅ Supports composite types (JapanAddress, JapanPersonName)
-- ✅ Includes prefectures enum (47 prefectures)
+```typescript
+import { useFormSubmit, getCsrfCookie } from '@famgia/omnify';
+import { Form, Button } from 'antd';
 
-## Supported Omnify Types
+function MyForm() {
+  const [form] = Form.useForm();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-### Numeric Types
-- `Id`, `Int`, `TinyInt`, `BigInt`, `Float` → `number`
+  const { handleSubmit, loading } = useFormSubmit({
+    form,
+    submitFn: createUser,
+    getCsrfToken: () => getCsrfCookie(apiUrl!),
+    onSuccess: (response) => {
+      message.success('Success!');
+    },
+  });
 
-### String Types
-- `String`, `Text`, `LongText`, `Email`, `Password`, `JapanPhone`, `Color`, `Time` → `string`
-
-### Boolean Types
-- `Boolean` → `boolean`
-
-### Date/Time Types
-- `Date`, `Timestamp` → `string` (ISO format)
-
-### JSON Types
-- `Json` → `Record<string, any>`
-
-### Enum Types
-- `Enum` → Generated union types
-
-### Relation Types
-- `Association`, `Polymorphic`, `Lookup` → `any` (skipped in models)
-
-### Select Types
-- `Select`, `SingleSelect`, `MultiSelect` → `string`
-
-### File Types
-- `File`, `MultiFile` → `string` (file path/URL)
-
-### Composite Types
-- `JapanAddress` → Expanded to flat fields (postal_code, prefecture_id, address1-3)
-- `JapanPersonName` → Expanded to flat fields (lastname, firstname, kana_lastname, kana_firstname)
-
-## Requirements
-
-- Node.js >= 16
-- TypeScript >= 5.0 (peer dependency)
-
-## Development
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
+  return (
+    <Form form={form} onFinish={handleSubmit}>
+      <Form.Item name="email">
+        <Input />
+      </Form.Item>
+      <Button type="primary" htmlType="submit" loading={loading}>
+        Submit
+      </Button>
+    </Form>
+  );
+}
 ```
 
-### Test Coverage
+## API
 
-The package includes comprehensive tests for:
-- Type mapping (Omnify types to TypeScript)
-- Enum generation
-- Model generation  
-- Context generation with helper methods
+### `useFormSubmit<TResponse>(options)`
 
-Current coverage:
-- Statements: ~70%
-- Branches: ~40%
-- Functions: ~80%
-- Lines: ~70%
+Hook for form submission with automatic Laravel validation error mapping.
+
+**Options:**
+- `form: FormInstance` - Ant Design form instance
+- `submitFn: (values) => Promise<TResponse>` - API call function
+- `getCsrfToken?: () => Promise<void>` - CSRF token getter
+- `onSuccess?: (response, values) => void` - Success callback
+- `onError?: (error, values) => void` - Custom error handler
+- `errorMessages?: { 500?, 401?, 403?, default? }` - Custom error messages
+
+**Returns:**
+- `handleSubmit: (values) => Promise<void>` - Submit handler
+- `loading: boolean` - Loading state
+- `setLoading: (loading) => void` - Set loading manually
+
+### `createLaravelAxios(baseURL)`
+
+Create pre-configured axios instance for Laravel API.
+
+```typescript
+import { createLaravelAxios } from '@famgia/omnify';
+
+const axios = createLaravelAxios('https://api.example.com');
+```
+
+### `getCsrfCookie(baseURL)`
+
+Get CSRF cookie for Laravel Sanctum.
+
+```typescript
+import { getCsrfCookie } from '@famgia/omnify';
+
+await getCsrfCookie('https://api.example.com');
+```
+
+## Benefits
+
+- 🚀 Reduce 100+ lines of boilerplate per form
+- 🛡️ Type-safe enums and models
+- 🔄 Auto-sync with backend schema
+- 📝 Consistent error handling
+- ⚡ Build-time code generation
+- 🎯 Runtime helpers for common tasks
 
 ## License
 
