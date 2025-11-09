@@ -57,13 +57,16 @@ function build(options: BuildOptions) {
     console.log('✅ Generated types/models.ts (base models)');
 
     // Generate extended models (only if they don't exist)
-    const objectNames = schema.objects ? Object.keys(schema.objects) : [];
+    // Schema structure is now flat: { "User": {...}, "Company": {...} }
+    const objectNames = Object.keys(schema).filter(key =>
+      schema[key] && typeof schema[key] === 'object' && schema[key].objectName
+    );
     let newModelsCount = 0;
     let existingModelsCount = 0;
 
     for (const objectName of objectNames) {
       const modelFilePath = path.join(modelsDir, `${objectName}.ts`);
-      
+
       if (!fs.existsSync(modelFilePath)) {
         const extendedModelContent = generateExtendedModelFile(objectName);
         fs.writeFileSync(modelFilePath, extendedModelContent);
