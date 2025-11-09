@@ -262,8 +262,34 @@ describe('modelGenerator', () => {
             expect(output).toContain("import * as Enums from './enums';");
         });
 
-        it('should use Base prefix for relation types', () => {
+        it('should import and use extended models for relation types', () => {
             const schema = {
+                User: {
+                    objectName: 'User',
+                    displayName: 'User',
+                    properties: {
+                        id: {
+                            type: 'Id',
+                            objectName: 'User',
+                            propertyName: 'id',
+                            displayName: 'ID',
+                            description: null,
+                        } as Property,
+                    },
+                },
+                Shop: {
+                    objectName: 'Shop',
+                    displayName: 'Shop',
+                    properties: {
+                        id: {
+                            type: 'Id',
+                            objectName: 'Shop',
+                            propertyName: 'id',
+                            displayName: 'ID',
+                            description: null,
+                        } as Property,
+                    },
+                },
                 Company: {
                     objectName: 'Company',
                     displayName: 'Company',
@@ -292,13 +318,14 @@ describe('modelGenerator', () => {
 
             const output = generateAllModels(schema);
 
-            // Should use BaseUser, not User
-            expect(output).toContain('created_by?: BaseUser | null');
-            // Should use BaseShop[], not Shop[]
-            expect(output).toContain('shops?: BaseShop[]');
-            // Should NOT contain raw types
-            expect(output).not.toContain('created_by?: User | null');
-            expect(output).not.toContain('shops?: Shop[]');
+            // Should import extended models
+            expect(output).toContain("import type { User, Shop, Company } from '../models';");
+            // Should use extended model types (User, Shop), not Base prefix
+            expect(output).toContain('created_by?: User | null');
+            expect(output).toContain('shops?: Shop[]');
+            // Should NOT use Base prefix
+            expect(output).not.toContain('created_by?: BaseUser | null');
+            expect(output).not.toContain('shops?: BaseShop[]');
         });
     });
 

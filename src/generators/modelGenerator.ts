@@ -96,6 +96,18 @@ export function generateAllModels(schema: SchemaLock): string {
   lines.push('import * as Enums from \'./enums\';');
   lines.push('');
 
+  // Collect all model names for import
+  const modelNames = Object.keys(schema).filter(key =>
+    schema[key] && typeof schema[key] === 'object' && schema[key].objectName
+  );
+
+  // Import extended models from ../models
+  if (modelNames.length > 0) {
+    lines.push('// Import extended models for relations');
+    lines.push(`import type { ${modelNames.join(', ')} } from '../models';`);
+    lines.push('');
+  }
+
   // Generate models
   for (const [objectName, object] of Object.entries(schema)) {
     lines.push(`// ${object.displayName}`);
@@ -126,19 +138,19 @@ export function generateAllModels(schema: SchemaLock): string {
       // Handle Association types
       if (prop.type === 'Association') {
         const comment = prop.displayName ? ` // ${prop.displayName}` : '';
-        // Use Base prefix for relation types since we're in base models
-        const baseTarget = `Base${prop.target}`;
+        // Use extended models (imported from ../models) for relations
+        const target = prop.target;
 
         switch (prop.relation) {
           case 'ManyToOne':
-            lines.push(`  ${propName}?: ${baseTarget} | null;${comment}`);
+            lines.push(`  ${propName}?: ${target} | null;${comment}`);
             break;
           case 'OneToOne':
-            lines.push(`  ${propName}?: ${baseTarget} | null;${comment}`);
+            lines.push(`  ${propName}?: ${target} | null;${comment}`);
             break;
           case 'OneToMany':
           case 'ManyToMany':
-            lines.push(`  ${propName}?: ${baseTarget}[];${comment}`);
+            lines.push(`  ${propName}?: ${target}[];${comment}`);
             break;
         }
         processedProps.add(propName);
