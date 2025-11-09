@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2025-11-09
+
+### Added
+- **Base Models + Extended Models pattern**: Base models are now auto-generated with `Base` prefix and should not be edited
+- **Extended models directory**: `models/` directory with customizable model files that extend base models
+- Extended model files are generated once and never overwritten, allowing full customization
+- `generateExtendedModelFile()` function to create customizable model templates
+- `generateModelsIndexFile()` to export all extended models
+
+### Changed
+- Base models now use `Base` prefix (e.g., `BaseUser`, `BaseCompany`)
+- Frontend code should import from `models/` instead of `types/models`
+- Main `index.ts` now exports from `models/` directory
+
+### Structure
+```
+omnify/
+├── types/
+│   ├── models.ts          # BaseUser, BaseCompany, etc (auto-generated, DO NOT EDIT)
+│   └── enums.ts
+├── models/
+│   ├── User.ts            # extends BaseUser (SAFE TO CUSTOMIZE)
+│   ├── Company.ts         # extends BaseCompany (SAFE TO CUSTOMIZE)
+│   └── index.ts           # exports all
+└── contexts/
+    └── EnumsContext.tsx
+```
+
+### Example
+```typescript
+// Auto-generated base model (DO NOT EDIT)
+// types/models.ts
+export interface BaseUser {
+  id: number;
+  name: string;
+}
+
+// Customizable extended model (SAFE TO EDIT)
+// models/User.ts
+import { BaseUser } from '../types/models';
+
+export interface User extends BaseUser {
+  // Add your custom fields here
+  fullName?: string;
+  avatarUrl?: string;
+}
+
+// Use in your app
+import { User } from '@/omnify';
+```
+
 ## [0.3.0] - 2025-11-09
 
 ### Added
@@ -12,17 +63,6 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - All helper methods now use `EnumKey` type instead of `keyof EnumOptions` for cleaner API
 - Improved IntelliSense support - now you get autocomplete for enum keys like `'account_type'`, `'company_type'`, etc.
-
-### Example
-```typescript
-import { useEnums, type EnumKey } from '@omnify';
-
-const { getOptions } = useEnums();
-
-// Now TypeScript will autocomplete and validate enum keys!
-const options = getOptions('account_type'); // ✅ autocomplete works
-const invalid = getOptions('invalid_key'); // ❌ TypeScript error
-```
 
 ## [0.2.3] - 2025-11-09
 
