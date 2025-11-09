@@ -90,7 +90,7 @@ describe('contextGenerator', () => {
 
             expect(output).toContain('const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, value: string | number): string | undefined => {');
             expect(output).toContain('if (!enums) return undefined;');
-            expect(output).toContain('const enumData = enums[objectName]?.[propertyName];');
+            expect(output).toContain('const enumData = enums[objectName]?.[propertyName] as Record<string, string> | undefined;');
         });
 
         it('should generate getValue helper method with 2-param signature', () => {
