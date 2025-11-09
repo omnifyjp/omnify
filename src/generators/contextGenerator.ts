@@ -123,6 +123,37 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('};');
   lines.push('');
 
+  // Generate pre-computed static options arrays
+  lines.push('// Pre-computed static arrays for performance');
+  lines.push('const STATIC_OPTIONS: { [K in EnumObjectName]: { [P in keyof EnumOptions[K]]: { value: string; label: string }[] } } = {');
+  for (const [objectName, propsMap] of enumsByObject.entries()) {
+    lines.push(`  ${objectName}: {`);
+    for (const [propertyName, enumInfo] of propsMap.entries()) {
+      lines.push(`    ${propertyName}: [`);
+      for (const { value, label } of enumInfo.values) {
+        lines.push(`      { value: '${value}', label: '${label}' },`);
+      }
+      lines.push(`    ],`);
+    }
+    lines.push('  },');
+  }
+  lines.push('} as any;');
+  lines.push('');
+
+  // Generate pre-computed prefecture options
+  lines.push('const PREFECTURES_OPTIONS: { value: string; label: string }[] = [');
+  for (const { code, label } of prefectures) {
+    lines.push(`  { value: '${code}', label: '${label}' },`);
+  }
+  lines.push('];');
+  lines.push('');
+  lines.push('const PREFECTURES_OPTIONS_NUMBERS: { value: number; label: string }[] = [');
+  for (const { code, label } of prefectures) {
+    lines.push(`  { value: ${code}, label: '${label}' },`);
+  }
+  lines.push('];');
+  lines.push('');
+
   // Generate context
   lines.push('export interface EnumsContextType {');
   lines.push('  enums: EnumOptions | null;');
@@ -185,18 +216,15 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  }, [enums]);');
   lines.push('');
   lines.push('  const getOptions = useCallback(<T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>): { value: string; label: string }[] => {');
-  lines.push('    if (!enums) return [];');
-  lines.push('    const enumData = enums[objectName]?.[propertyName] as Record<string, string> | undefined;');
-  lines.push('    if (!enumData) return [];');
-  lines.push('    return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
-  lines.push('  }, [enums]);');
+  lines.push('    return (STATIC_OPTIONS as any)[objectName]?.[propertyName] || [];');
+  lines.push('  }, []);');
   lines.push('');
   lines.push('  const getPrefectures = useCallback((): { value: string; label: string }[] => {');
-  lines.push('    return Object.entries(PREFECTURES).map(([value, label]) => ({ value, label }));');
+  lines.push('    return PREFECTURES_OPTIONS;');
   lines.push('  }, []);');
   lines.push('');
   lines.push('  const getPrefecturesAsNumbers = useCallback((): { value: number; label: string }[] => {');
-  lines.push('    return Object.entries(PREFECTURES).map(([value, label]) => ({ value: Number(value), label }));');
+  lines.push('    return PREFECTURES_OPTIONS_NUMBERS;');
   lines.push('  }, []);');
   lines.push('');
   lines.push('  const value = useMemo(() => ({');

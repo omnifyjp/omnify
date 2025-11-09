@@ -106,8 +106,9 @@ describe('contextGenerator', () => {
             const output = generateEnumContextFile(mockEnums);
 
             expect(output).toContain('const getOptions = useCallback(<T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>): { value: string; label: string }[] => {');
-            expect(output).toContain('}, [enums]);');
-            expect(output).toContain('return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
+            expect(output).toContain('}, []);');
+            expect(output).toContain('return (STATIC_OPTIONS as any)[objectName]?.[propertyName] || [];');
+            expect(output).toContain('const STATIC_OPTIONS:');
         });
 
         it('should generate useEnums hook', () => {
