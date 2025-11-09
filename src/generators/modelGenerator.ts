@@ -126,17 +126,19 @@ export function generateAllModels(schema: SchemaLock): string {
       // Handle Association types
       if (prop.type === 'Association') {
         const comment = prop.displayName ? ` // ${prop.displayName}` : '';
+        // Use Base prefix for relation types since we're in base models
+        const baseTarget = `Base${prop.target}`;
 
         switch (prop.relation) {
           case 'ManyToOne':
-            lines.push(`  ${propName}?: ${prop.target} | null;${comment}`);
+            lines.push(`  ${propName}?: ${baseTarget} | null;${comment}`);
             break;
           case 'OneToOne':
-            lines.push(`  ${propName}?: ${prop.target} | null;${comment}`);
+            lines.push(`  ${propName}?: ${baseTarget} | null;${comment}`);
             break;
           case 'OneToMany':
           case 'ManyToMany':
-            lines.push(`  ${propName}?: ${prop.target}[];${comment}`);
+            lines.push(`  ${propName}?: ${baseTarget}[];${comment}`);
             break;
         }
         processedProps.add(propName);

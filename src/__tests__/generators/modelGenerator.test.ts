@@ -261,6 +261,45 @@ describe('modelGenerator', () => {
 
             expect(output).toContain("import * as Enums from './enums';");
         });
+
+        it('should use Base prefix for relation types', () => {
+            const schema = {
+                Company: {
+                    objectName: 'Company',
+                    displayName: 'Company',
+                    properties: {
+                        created_by: {
+                            type: 'Association',
+                            relation: 'ManyToOne',
+                            target: 'User',
+                            objectName: 'Company',
+                            propertyName: 'created_by',
+                            displayName: 'Created By',
+                            description: null,
+                        } as Property,
+                        shops: {
+                            type: 'Association',
+                            relation: 'OneToMany',
+                            target: 'Shop',
+                            objectName: 'Company',
+                            propertyName: 'shops',
+                            displayName: 'Shops',
+                            description: null,
+                        } as Property,
+                    },
+                },
+            } as any;
+
+            const output = generateAllModels(schema);
+
+            // Should use BaseUser, not User
+            expect(output).toContain('created_by?: BaseUser | null');
+            // Should use BaseShop[], not Shop[]
+            expect(output).toContain('shops?: BaseShop[]');
+            // Should NOT contain raw types
+            expect(output).not.toContain('created_by?: User | null');
+            expect(output).not.toContain('shops?: Shop[]');
+        });
     });
 
     describe('generateExtendedModelFile', () => {
