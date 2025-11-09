@@ -71,9 +71,9 @@ describe('contextGenerator', () => {
             expect(output).toContain('enums: EnumOptions | null;');
             expect(output).toContain('loading: boolean;');
             expect(output).toContain('error: Error | null;');
-            expect(output).toContain('getLabel: (enumKey: EnumKey, value: string | number) => string | undefined;');
-            expect(output).toContain('getValue: (enumKey: EnumKey, label: string) => string | undefined;');
-            expect(output).toContain('getOptions: (enumKey: EnumKey) => { value: string; label: string }[];');
+            expect(output).toContain('getLabel: <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number) => string | undefined;');
+            expect(output).toContain('getValue: <T extends EnumObjectName>(objectName: T, propertyName: string, label: string) => string | undefined;');
+            expect(output).toContain('getOptions: <T extends EnumObjectName>(objectName: T, propertyName: string) => { value: string; label: string }[];');
         });
 
         it('should generate EnumsProvider component', () => {
@@ -84,26 +84,25 @@ describe('contextGenerator', () => {
             expect(output).toContain('<EnumsContext.Provider');
         });
 
-        it('should generate getLabel helper method with EnumKey type', () => {
+        it('should generate getLabel helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getLabel = (enumKey: EnumKey, value: string | number): string | undefined => {');
+            expect(output).toContain('const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number): string | undefined => {');
             expect(output).toContain('if (!enums) return undefined;');
-            expect(output).toContain('const enumData = enums[enumKey];');
-            expect(output).toContain('return enumData[String(value)];');
+            expect(output).toContain('const enumData = enums[objectName]?.[propertyName];');
         });
 
-        it('should generate getValue helper method with EnumKey type', () => {
+        it('should generate getValue helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getValue = (enumKey: EnumKey, label: string): string | undefined => {');
+            expect(output).toContain('const getValue = <T extends EnumObjectName>(objectName: T, propertyName: string, label: string): string | undefined => {');
             expect(output).toContain('return Object.entries(enumData).find(([_, l]) => l === label)?.[0];');
         });
 
-        it('should generate getOptions helper method with EnumKey type', () => {
+        it('should generate getOptions helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getOptions = (enumKey: EnumKey): { value: string; label: string }[] => {');
+            expect(output).toContain('const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: string): { value: string; label: string }[] => {');
             expect(output).toContain('return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
         });
 

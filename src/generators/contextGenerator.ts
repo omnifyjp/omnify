@@ -32,13 +32,13 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  prefectures: Record<string, string>;');
   lines.push('}');
   lines.push('');
-  
+
   // Generate type-safe unions for IDE autocomplete
   lines.push('// Type-safe keys for IDE autocomplete');
   const allObjectNames = Array.from(enumsByObject.keys());
   lines.push(`export type EnumObjectName = ${allObjectNames.map(n => `'${n}'`).join(' | ')};`);
   lines.push('');
-  
+
   // Generate property name unions per object
   for (const [objectName, propsMap] of enumsByObject.entries()) {
     const propNames = Array.from(propsMap.keys());
@@ -125,20 +125,20 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  loading: boolean;');
   lines.push('  error: Error | null;');
   lines.push('  /**');
-  lines.push('   * Get label by enum key and value');
-  lines.push('   * @example getLabel("account_type", "ORDINARY") // "普通"');
+  lines.push('   * Get label by object name, property name, and value');
+  lines.push('   * @example getLabel("ApplicationForm", "account_type", "ORDINARY") // "普通"');
   lines.push('   */');
-  lines.push('  getLabel: (enumKey: EnumKey, value: string | number) => string | undefined;');
+  lines.push('  getLabel: <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number) => string | undefined;');
   lines.push('  /**');
-  lines.push('   * Get value by enum key and label');
-  lines.push('   * @example getValue("account_type", "普通") // "ORDINARY"');
+  lines.push('   * Get value by object name, property name, and label');
+  lines.push('   * @example getValue("ApplicationForm", "account_type", "普通") // "ORDINARY"');
   lines.push('   */');
-  lines.push('  getValue: (enumKey: EnumKey, label: string) => string | undefined;');
+  lines.push('  getValue: <T extends EnumObjectName>(objectName: T, propertyName: string, label: string) => string | undefined;');
   lines.push('  /**');
-  lines.push('   * Get select options by enum key');
-  lines.push('   * @example getOptions("account_type") // [{ value: "ORDINARY", label: "普通" }, ...]');
+  lines.push('   * Get select options by object name and property name');
+  lines.push('   * @example getOptions("ApplicationForm", "account_type") // [{ value: "ORDINARY", label: "普通" }, ...]');
   lines.push('   */');
-  lines.push('  getOptions: (enumKey: EnumKey) => { value: string; label: string }[];');
+  lines.push('  getOptions: <T extends EnumObjectName>(objectName: T, propertyName: string) => { value: string; label: string }[];');
   lines.push('}');
   lines.push('');
   lines.push('const EnumsContext = createContext<EnumsContextType | undefined>(undefined);');
@@ -148,23 +148,35 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  const [loading] = useState(false);');
   lines.push('  const [error] = useState<Error | null>(null);');
   lines.push('');
-  lines.push('  const getLabel = (enumKey: EnumKey, value: string | number): string | undefined => {');
+  lines.push('  const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
-  lines.push('    const enumData = enums[enumKey];');
+  lines.push('    // Special case for prefectures');
+  lines.push('    if (objectName === \'prefectures\' as any) {');
+  lines.push('      return (enums as any).prefectures?.[String(value)];');
+  lines.push('    }');
+  lines.push('    const enumData = enums[objectName]?.[propertyName];');
   lines.push('    if (!enumData) return undefined;');
   lines.push('    return enumData[String(value)];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getValue = (enumKey: EnumKey, label: string): string | undefined => {');
+  lines.push('  const getValue = <T extends EnumObjectName>(objectName: T, propertyName: string, label: string): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
-  lines.push('    const enumData = enums[enumKey];');
+  lines.push('    // Special case for prefectures');
+  lines.push('    if (objectName === \'prefectures\' as any) {');
+  lines.push('      return Object.entries((enums as any).prefectures || {}).find(([_, l]) => l === label)?.[0];');
+  lines.push('    }');
+  lines.push('    const enumData = enums[objectName]?.[propertyName];');
   lines.push('    if (!enumData) return undefined;');
   lines.push('    return Object.entries(enumData).find(([_, l]) => l === label)?.[0];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getOptions = (enumKey: EnumKey): { value: string; label: string }[] => {');
+  lines.push('  const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: string): { value: string; label: string }[] => {');
   lines.push('    if (!enums) return [];');
-  lines.push('    const enumData = enums[enumKey];');
+  lines.push('    // Special case for prefectures');
+  lines.push('    if (objectName === \'prefectures\' as any) {');
+  lines.push('      return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label }));');
+  lines.push('    }');
+  lines.push('    const enumData = enums[objectName]?.[propertyName];');
   lines.push('    if (!enumData) return [];');
   lines.push('    return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
   lines.push('  };');
