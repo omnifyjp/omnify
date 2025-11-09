@@ -1,11 +1,11 @@
 {
   "name": "@famgia/omnify",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Convert Omnify schema-lock.json to TypeScript models and enums",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "omnify-build": "./dist/cli.js"
+    "omnify-build": "dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

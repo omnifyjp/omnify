@@ -29,6 +29,11 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  prefectures: Record<string, string>;');
   lines.push('}');
   lines.push('');
+  
+  // Generate EnumKey type for better type safety
+  lines.push('// Type-safe enum keys');
+  lines.push('export type EnumKey = keyof EnumOptions;');
+  lines.push('');
 
   // Generate static enum data
   lines.push('const STATIC_ENUMS: EnumOptions = {');
@@ -101,13 +106,25 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('');
 
   // Generate context
-  lines.push('interface EnumsContextType {');
+  lines.push('export interface EnumsContextType {');
   lines.push('  enums: EnumOptions | null;');
   lines.push('  loading: boolean;');
   lines.push('  error: Error | null;');
-  lines.push('  getLabel: (enumKey: keyof EnumOptions, value: string | number) => string | undefined;');
-  lines.push('  getValue: (enumKey: keyof EnumOptions, label: string) => string | undefined;');
-  lines.push('  getOptions: (enumKey: keyof EnumOptions) => { value: string; label: string }[];');
+  lines.push('  /**');
+  lines.push('   * Get label by enum key and value');
+  lines.push('   * @example getLabel("account_type", "ORDINARY") // "普通"');
+  lines.push('   */');
+  lines.push('  getLabel: (enumKey: EnumKey, value: string | number) => string | undefined;');
+  lines.push('  /**');
+  lines.push('   * Get value by enum key and label');
+  lines.push('   * @example getValue("account_type", "普通") // "ORDINARY"');
+  lines.push('   */');
+  lines.push('  getValue: (enumKey: EnumKey, label: string) => string | undefined;');
+  lines.push('  /**');
+  lines.push('   * Get select options by enum key');
+  lines.push('   * @example getOptions("account_type") // [{ value: "ORDINARY", label: "普通" }, ...]');
+  lines.push('   */');
+  lines.push('  getOptions: (enumKey: EnumKey) => { value: string; label: string }[];');
   lines.push('}');
   lines.push('');
   lines.push('const EnumsContext = createContext<EnumsContextType | undefined>(undefined);');
@@ -117,21 +134,21 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  const [loading] = useState(false);');
   lines.push('  const [error] = useState<Error | null>(null);');
   lines.push('');
-  lines.push('  const getLabel = (enumKey: keyof EnumOptions, value: string | number): string | undefined => {');
+  lines.push('  const getLabel = (enumKey: EnumKey, value: string | number): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
   lines.push('    const enumData = enums[enumKey];');
   lines.push('    if (!enumData) return undefined;');
   lines.push('    return enumData[String(value)];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getValue = (enumKey: keyof EnumOptions, label: string): string | undefined => {');
+  lines.push('  const getValue = (enumKey: EnumKey, label: string): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
   lines.push('    const enumData = enums[enumKey];');
   lines.push('    if (!enumData) return undefined;');
   lines.push('    return Object.entries(enumData).find(([_, l]) => l === label)?.[0];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getOptions = (enumKey: keyof EnumOptions): { value: string; label: string }[] => {');
+  lines.push('  const getOptions = (enumKey: EnumKey): { value: string; label: string }[] => {');
   lines.push('    if (!enums) return [];');
   lines.push('    const enumData = enums[enumKey];');
   lines.push('    if (!enumData) return [];');
