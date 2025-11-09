@@ -149,6 +149,11 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('   * @example getPrefectures() // [{ value: "1", label: "北海道" }, ...]');
   lines.push('   */');
   lines.push('  getPrefectures: () => { value: string; label: string }[];');
+  lines.push('  /**');
+  lines.push('   * Get prefecture options with numeric values');
+  lines.push('   * @example getPrefecturesAsNumbers() // [{ value: 1, label: "北海道" }, ...]');
+  lines.push('   */');
+  lines.push('  getPrefecturesAsNumbers: () => { value: number; label: string }[];');
   lines.push('}');
   lines.push('');
   lines.push('const EnumsContext = createContext<EnumsContextType | undefined>(undefined);');
@@ -189,7 +194,12 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('');
   lines.push('  const getPrefectures = (): { value: string; label: string }[] => {');
   lines.push('    if (!enums) return [];');
-  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label }));');
+  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label: label as string }));');
+  lines.push('  };');
+  lines.push('');
+  lines.push('  const getPrefecturesAsNumbers = (): { value: number; label: string }[] => {');
+  lines.push('    if (!enums) return [];');
+  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value: Number(value), label: label as string }));');
   lines.push('  };');
   lines.push('');
   lines.push('  return (');
@@ -202,6 +212,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('        getValue,');
   lines.push('        getOptions,');
   lines.push('        getPrefectures,');
+  lines.push('        getPrefecturesAsNumbers,');
   lines.push('      }}');
   lines.push('    >');
   lines.push('      {children}');

@@ -75,6 +75,7 @@ describe('contextGenerator', () => {
             expect(output).toContain('getValue: <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, label: string) => string | undefined;');
             expect(output).toContain('getOptions: <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>) => { value: string; label: string }[];');
             expect(output).toContain('getPrefectures: () => { value: string; label: string }[];');
+            expect(output).toContain('getPrefecturesAsNumbers: () => { value: number; label: string }[];');
         });
 
         it('should generate EnumsProvider component', () => {
