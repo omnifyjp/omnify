@@ -57,7 +57,7 @@ function build(options: BuildOptions) {
     console.log('✅ Generated types/models.ts (base models)');
 
     // Generate extended models (only if they don't exist)
-    const objectNames = Object.keys(schema.objects);
+    const objectNames = schema.objects ? Object.keys(schema.objects) : [];
     let newModelsCount = 0;
     let existingModelsCount = 0;
 
