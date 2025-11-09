@@ -139,6 +139,11 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('   * @example getOptions("ApplicationForm", "account_type") // [{ value: "ORDINARY", label: "普通" }, ...]');
   lines.push('   */');
   lines.push('  getOptions: <T extends EnumObjectName>(objectName: T, propertyName: string) => { value: string; label: string }[];');
+  lines.push('  /**');
+  lines.push('   * Get prefecture options');
+  lines.push('   * @example getPrefectures() // [{ value: "1", label: "北海道" }, ...]');
+  lines.push('   */');
+  lines.push('  getPrefectures: () => { value: string; label: string }[];');
   lines.push('}');
   lines.push('');
   lines.push('const EnumsContext = createContext<EnumsContextType | undefined>(undefined);');
@@ -172,13 +177,14 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('');
   lines.push('  const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: string): { value: string; label: string }[] => {');
   lines.push('    if (!enums) return [];');
-  lines.push('    // Special case for prefectures');
-  lines.push('    if (objectName === \'prefectures\' as any) {');
-  lines.push('      return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label }));');
-  lines.push('    }');
   lines.push('    const enumData = enums[objectName]?.[propertyName];');
   lines.push('    if (!enumData) return [];');
   lines.push('    return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
+  lines.push('  };');
+  lines.push('');
+  lines.push('  const getPrefectures = (): { value: string; label: string }[] => {');
+  lines.push('    if (!enums) return [];');
+  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label }));');
   lines.push('  };');
   lines.push('');
   lines.push('  return (');
@@ -190,6 +196,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('        getLabel,');
   lines.push('        getValue,');
   lines.push('        getOptions,');
+  lines.push('        getPrefectures,');
   lines.push('      }}');
   lines.push('    >');
   lines.push('      {children}');
