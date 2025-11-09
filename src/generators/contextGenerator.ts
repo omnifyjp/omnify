@@ -38,12 +38,17 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   const allObjectNames = Array.from(enumsByObject.keys());
   lines.push(`export type EnumObjectName = ${allObjectNames.map(n => `'${n}'`).join(' | ')};`);
   lines.push('');
-
+  
   // Generate property name unions per object
   for (const [objectName, propsMap] of enumsByObject.entries()) {
     const propNames = Array.from(propsMap.keys());
     lines.push(`export type ${objectName}EnumProperty = ${propNames.map(p => `'${p}'`).join(' | ')};`);
   }
+  lines.push('');
+  
+  // Generate conditional type for property names based on object name
+  lines.push('// Conditional type to get property names for each object');
+  lines.push('export type EnumPropertyName<T extends EnumObjectName> = T extends keyof EnumOptions ? keyof EnumOptions[T] : never;');
   lines.push('');
 
   // Generate static enum data (nested structure)
@@ -128,17 +133,17 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('   * Get label by object name, property name, and value');
   lines.push('   * @example getLabel("ApplicationForm", "account_type", "ORDINARY") // "普通"');
   lines.push('   */');
-  lines.push('  getLabel: <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number) => string | undefined;');
+  lines.push('  getLabel: <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, value: string | number) => string | undefined;');
   lines.push('  /**');
   lines.push('   * Get value by object name, property name, and label');
   lines.push('   * @example getValue("ApplicationForm", "account_type", "普通") // "ORDINARY"');
   lines.push('   */');
-  lines.push('  getValue: <T extends EnumObjectName>(objectName: T, propertyName: string, label: string) => string | undefined;');
+  lines.push('  getValue: <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, label: string) => string | undefined;');
   lines.push('  /**');
   lines.push('   * Get select options by object name and property name');
   lines.push('   * @example getOptions("ApplicationForm", "account_type") // [{ value: "ORDINARY", label: "普通" }, ...]');
   lines.push('   */');
-  lines.push('  getOptions: <T extends EnumObjectName>(objectName: T, propertyName: string) => { value: string; label: string }[];');
+  lines.push('  getOptions: <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>) => { value: string; label: string }[];');
   lines.push('  /**');
   lines.push('   * Get prefecture options');
   lines.push('   * @example getPrefectures() // [{ value: "1", label: "北海道" }, ...]');
@@ -153,7 +158,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  const [loading] = useState(false);');
   lines.push('  const [error] = useState<Error | null>(null);');
   lines.push('');
-  lines.push('  const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: string, value: string | number): string | undefined => {');
+  lines.push('  const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, value: string | number): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
   lines.push('    // Special case for prefectures');
   lines.push('    if (objectName === \'prefectures\' as any) {');
@@ -164,7 +169,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('    return enumData[String(value)];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getValue = <T extends EnumObjectName>(objectName: T, propertyName: string, label: string): string | undefined => {');
+  lines.push('  const getValue = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, label: string): string | undefined => {');
   lines.push('    if (!enums) return undefined;');
   lines.push('    // Special case for prefectures');
   lines.push('    if (objectName === \'prefectures\' as any) {');
@@ -175,7 +180,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('    return Object.entries(enumData).find(([_, l]) => l === label)?.[0];');
   lines.push('  };');
   lines.push('');
-  lines.push('  const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: string): { value: string; label: string }[] => {');
+  lines.push('  const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>): { value: string; label: string }[] => {');
   lines.push('    if (!enums) return [];');
   lines.push('    const enumData = enums[objectName]?.[propertyName];');
   lines.push('    if (!enumData) return [];');
