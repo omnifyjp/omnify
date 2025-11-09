@@ -11,38 +11,51 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push("import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';");
   lines.push('');
 
-  // Group by property name
-  const enumsByProperty = new Map<string, EnumInfo[]>();
+  // Group by objectName for nested structure
+  const enumsByObject = new Map<string, Map<string, EnumInfo>>();
   for (const enumInfo of enums) {
-    const key = enumInfo.propertyName;
-    if (!enumsByProperty.has(key)) {
-      enumsByProperty.set(key, []);
+    if (!enumsByObject.has(enumInfo.objectName)) {
+      enumsByObject.set(enumInfo.objectName, new Map());
     }
-    enumsByProperty.get(key)!.push(enumInfo);
+    enumsByObject.get(enumInfo.objectName)!.set(enumInfo.propertyName, enumInfo);
   }
 
-  // Generate EnumOptions interface
+  // Generate nested EnumOptions interface
   lines.push('export interface EnumOptions {');
-  for (const propertyName of enumsByProperty.keys()) {
-    lines.push(`  ${propertyName}: Record<string, string>;`);
+  for (const [objectName, propsMap] of enumsByObject.entries()) {
+    lines.push(`  ${objectName}: {`);
+    for (const propertyName of propsMap.keys()) {
+      lines.push(`    ${propertyName}: Record<string, string>;`);
+    }
+    lines.push('  };');
   }
   lines.push('  prefectures: Record<string, string>;');
   lines.push('}');
   lines.push('');
   
-  // Generate EnumKey type with explicit union for better IDE autocomplete
-  lines.push('// Type-safe enum keys with IDE autocomplete support');
-  const enumKeys = Array.from(enumsByProperty.keys()).concat(['prefectures']);
-  lines.push(`export type EnumKey = ${enumKeys.map(k => `'${k}'`).join(' | ')};`);
+  // Generate type-safe unions for IDE autocomplete
+  lines.push('// Type-safe keys for IDE autocomplete');
+  const allObjectNames = Array.from(enumsByObject.keys());
+  lines.push(`export type EnumObjectName = ${allObjectNames.map(n => `'${n}'`).join(' | ')};`);
+  lines.push('');
+  
+  // Generate property name unions per object
+  for (const [objectName, propsMap] of enumsByObject.entries()) {
+    const propNames = Array.from(propsMap.keys());
+    lines.push(`export type ${objectName}EnumProperty = ${propNames.map(p => `'${p}'`).join(' | ')};`);
+  }
   lines.push('');
 
-  // Generate static enum data
+  // Generate static enum data (nested structure)
   lines.push('const STATIC_ENUMS: EnumOptions = {');
-  for (const [propertyName, enumInfos] of enumsByProperty.entries()) {
-    const values = enumInfos[0].values;
-    lines.push(`  ${propertyName}: {`);
-    for (const { value, label } of values) {
-      lines.push(`    ${value}: '${label}',`);
+  for (const [objectName, propsMap] of enumsByObject.entries()) {
+    lines.push(`  ${objectName}: {`);
+    for (const [propertyName, enumInfo] of propsMap.entries()) {
+      lines.push(`    ${propertyName}: {`);
+      for (const { value, label } of enumInfo.values) {
+        lines.push(`      ${value}: '${label}',`);
+      }
+      lines.push(`    },`);
     }
     lines.push('  },');
   }

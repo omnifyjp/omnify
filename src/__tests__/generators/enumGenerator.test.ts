@@ -96,11 +96,11 @@ describe('enumGenerator', () => {
             expect(output).toContain("| 'ADMIN'");
             expect(output).toContain("| 'USER'");
 
-            // Check enum options
-            expect(output).toContain('export const statusOptions = {');
+            // Check enum options with full keys
+            expect(output).toContain('export const User_statusOptions = {');
             expect(output).toContain("ACTIVE: 'Active'");
             expect(output).toContain("INACTIVE: 'Inactive'");
-            expect(output).toContain('export const roleOptions = {');
+            expect(output).toContain('export const User_roleOptions = {');
             expect(output).toContain("ADMIN: 'Administrator'");
             expect(output).toContain("USER: 'User'");
         });
