@@ -88,7 +88,8 @@ describe('contextGenerator', () => {
         it('should generate getLabel helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getLabel = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, value: string | number): string | undefined => {');
+            expect(output).toContain('const getLabel = useCallback(<T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, value: string | number): string | undefined => {');
+            expect(output).toContain('}, [enums]);');
             expect(output).toContain('if (!enums) return undefined;');
             expect(output).toContain('const enumData = enums[objectName]?.[propertyName] as Record<string, string> | undefined;');
         });
@@ -96,14 +97,16 @@ describe('contextGenerator', () => {
         it('should generate getValue helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getValue = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, label: string): string | undefined => {');
+            expect(output).toContain('const getValue = useCallback(<T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>, label: string): string | undefined => {');
+            expect(output).toContain('}, [enums]);');
             expect(output).toContain('return Object.entries(enumData).find(([_, l]) => l === label)?.[0];');
         });
 
         it('should generate getOptions helper method with 2-param signature', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('const getOptions = <T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>): { value: string; label: string }[] => {');
+            expect(output).toContain('const getOptions = useCallback(<T extends EnumObjectName>(objectName: T, propertyName: EnumPropertyName<T>): { value: string; label: string }[] => {');
+            expect(output).toContain('}, [enums]);');
             expect(output).toContain('return Object.entries(enumData).map(([value, label]) => ({ value, label }));');
         });
 
