@@ -31,7 +31,6 @@ describe('contextGenerator', () => {
             expect(output).toContain('User: {');
             expect(output).toContain('status: Record<string, string>;');
             expect(output).toContain('role: Record<string, string>;');
-            expect(output).toContain('prefectures: Record<string, string>;');
         });
 
         it('should generate EnumObjectName type for IDE autocomplete', () => {
@@ -55,10 +54,10 @@ describe('contextGenerator', () => {
             expect(output).toContain("USER: 'User'");
         });
 
-        it('should include all 47 prefectures', () => {
+        it('should include all 47 prefectures in separate const', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('prefectures: {');
+            expect(output).toContain('const PREFECTURES: Record<string, string> = {');
             expect(output).toContain("'1': '北海道'");
             expect(output).toContain("'13': '東京都'");
             expect(output).toContain("'47': '沖縄県'");
@@ -120,7 +119,7 @@ describe('contextGenerator', () => {
             const output = generateEnumContextFile([]);
 
             expect(output).toContain('export interface EnumOptions {');
-            expect(output).toContain('prefectures: Record<string, string>;');
+            expect(output).toContain('const PREFECTURES: Record<string, string> = {');
             expect(output).toContain('const STATIC_ENUMS: EnumOptions = {');
         });
     });

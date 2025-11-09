@@ -20,7 +20,7 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
     enumsByObject.get(enumInfo.objectName)!.set(enumInfo.propertyName, enumInfo);
   }
 
-  // Generate nested EnumOptions interface
+  // Generate nested EnumOptions interface (only schema enums)
   lines.push('export interface EnumOptions {');
   for (const [objectName, propsMap] of enumsByObject.entries()) {
     lines.push(`  ${objectName}: {`);
@@ -29,7 +29,6 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
     }
     lines.push('  };');
   }
-  lines.push('  prefectures: Record<string, string>;');
   lines.push('}');
   lines.push('');
 
@@ -51,22 +50,8 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('export type EnumPropertyName<T extends EnumObjectName> = T extends keyof EnumOptions ? keyof EnumOptions[T] : never;');
   lines.push('');
 
-  // Generate static enum data (nested structure)
-  lines.push('const STATIC_ENUMS: EnumOptions = {');
-  for (const [objectName, propsMap] of enumsByObject.entries()) {
-    lines.push(`  ${objectName}: {`);
-    for (const [propertyName, enumInfo] of propsMap.entries()) {
-      lines.push(`    ${propertyName}: {`);
-      for (const { value, label } of enumInfo.values) {
-        lines.push(`      ${value}: '${label}',`);
-      }
-      lines.push(`    },`);
-    }
-    lines.push('  },');
-  }
-
-  // Add prefectures
-  lines.push('  prefectures: {');
+  // Generate prefectures data (separate from schema enums)
+  lines.push('const PREFECTURES: Record<string, string> = {');
   const prefectures = [
     { code: 1, label: '北海道' },
     { code: 2, label: '青森県' },
@@ -117,10 +102,24 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
     { code: 47, label: '沖縄県' },
   ];
   for (const { code, label } of prefectures) {
-    lines.push(`    '${code}': '${label}',`);
+    lines.push(`  '${code}': '${label}',`);
   }
-  lines.push('  },');
+  lines.push('};');
+  lines.push('');
 
+  // Generate static enum data (nested structure, only schema enums)
+  lines.push('const STATIC_ENUMS: EnumOptions = {');
+  for (const [objectName, propsMap] of enumsByObject.entries()) {
+    lines.push(`  ${objectName}: {`);
+    for (const [propertyName, enumInfo] of propsMap.entries()) {
+      lines.push(`    ${propertyName}: {`);
+      for (const { value, label } of enumInfo.values) {
+        lines.push(`      ${value}: '${label}',`);
+      }
+      lines.push(`    },`);
+    }
+    lines.push('  },');
+  }
   lines.push('};');
   lines.push('');
 
@@ -193,13 +192,11 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('  };');
   lines.push('');
   lines.push('  const getPrefectures = (): { value: string; label: string }[] => {');
-  lines.push('    if (!enums) return [];');
-  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value, label: label as string }));');
+  lines.push('    return Object.entries(PREFECTURES).map(([value, label]) => ({ value, label }));');
   lines.push('  };');
   lines.push('');
   lines.push('  const getPrefecturesAsNumbers = (): { value: number; label: string }[] => {');
-  lines.push('    if (!enums) return [];');
-  lines.push('    return Object.entries((enums as any).prefectures || {}).map(([value, label]) => ({ value: Number(value), label: label as string }));');
+  lines.push('    return Object.entries(PREFECTURES).map(([value, label]) => ({ value: Number(value), label }));');
   lines.push('  };');
   lines.push('');
   lines.push('  return (');
