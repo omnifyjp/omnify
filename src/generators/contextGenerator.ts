@@ -30,9 +30,10 @@ export function generateEnumContextFile(enums: EnumInfo[]): string {
   lines.push('}');
   lines.push('');
   
-  // Generate EnumKey type for better type safety
-  lines.push('// Type-safe enum keys');
-  lines.push('export type EnumKey = keyof EnumOptions;');
+  // Generate EnumKey type with explicit union for better IDE autocomplete
+  lines.push('// Type-safe enum keys with IDE autocomplete support');
+  const enumKeys = Array.from(enumsByProperty.keys()).concat(['prefectures']);
+  lines.push(`export type EnumKey = ${enumKeys.map(k => `'${k}'`).join(' | ')};`);
   lines.push('');
 
   // Generate static enum data

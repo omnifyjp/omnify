@@ -33,11 +33,11 @@ describe('contextGenerator', () => {
             expect(output).toContain('prefectures: Record<string, string>;');
         });
 
-        it('should generate EnumKey type for type safety', () => {
+        it('should generate EnumKey type with explicit union for IDE autocomplete', () => {
             const output = generateEnumContextFile(mockEnums);
 
-            expect(output).toContain('// Type-safe enum keys');
-            expect(output).toContain('export type EnumKey = keyof EnumOptions;');
+            expect(output).toContain('// Type-safe enum keys with IDE autocomplete support');
+            expect(output).toContain("export type EnumKey = 'status' | 'role' | 'prefectures';");
         });
 
         it('should generate STATIC_ENUMS object', () => {
