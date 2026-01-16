@@ -1,5 +1,5 @@
 
-> @famgia/omnify@1.0.174 test /Users/f.satoshi/Herd/omnify-ts/packages/omnify
+> @famgia/omnify@1.0.175 test /Users/f.satoshi/Herd/omnify-ts/packages/omnify
 > vitest run --passWithNoTests
 
 
