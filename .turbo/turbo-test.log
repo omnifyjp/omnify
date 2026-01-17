@@ -1,12 +1,12 @@
 
-> @famgia/omnify@1.0.178 test /Users/f.satoshi/Herd/omnify-ts/packages/omnify
+> @famgia/omnify@1.0.179 test /Users/f.satoshi/Herd/omnify-ts/packages/omnify
 > vitest run --passWithNoTests
 
 
  RUN  v1.6.1 /Users/f.satoshi/Herd/omnify-ts/packages/omnify
 
 include: packages/*/src/**/*.{test,spec}.ts
-exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
-watch exclude:  **/node_modules/**, **/dist/**
 No test files found, exiting with code 0
 
+exclude:  **/node_modules/**, **/dist/**, **/cypress/**, **/.{idea,git,cache,output,temp}/**, **/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build,eslint,prettier}.config.*
+watch exclude:  **/node_modules/**, **/dist/**
