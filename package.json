@@ -1,6 +1,6 @@
 {
   "name": "@famgia/omnify",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Schema-driven database migration system with TypeScript types and Laravel migrations",
   "type": "module",
   "main": "./dist/index.js",
