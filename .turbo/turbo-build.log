@@ -1,5 +1,6 @@
 
-> @famgia/omnify@1.0.185 build /Users/f.satoshi/Herd/omnify-ts/packages/omnify
+
+> @famgia/omnify@1.0.186 build /Users/f.satoshi/Herd/omnify-ts/packages/omnify
 > tsup
 
 [34mCLI[39m Building entry: src/index.ts
@@ -12,11 +13,11 @@
 [34mCJS[39m Build start
 [32mESM[39m [1mdist/index.js     [22m[32m1.66 KB[39m
 [32mESM[39m [1mdist/index.js.map [22m[32m2.58 KB[39m
-[32mESM[39m ⚡️ Build success in 19ms
+[32mESM[39m ⚡️ Build success in 39ms
 [32mCJS[39m [1mdist/index.cjs     [22m[32m4.30 KB[39m
 [32mCJS[39m [1mdist/index.cjs.map [22m[32m2.43 KB[39m
-[32mCJS[39m ⚡️ Build success in 20ms
-[34mDTS[39m Build start
-[32mDTS[39m ⚡️ Build success in 434ms
-[32mDTS[39m [1mdist/index.d.ts  [22m[32m1.29 KB[39m
-[32mDTS[39m [1mdist/index.d.cts [22m[32m1.29 KB[39m
+[32mCJS[39m ⚡️ Build success in 39ms
+DTS Build start
+DTS ⚡️ Build success in 477ms
+DTS dist/index.d.ts  1.29 KB
+DTS dist/index.d.cts 1.29 KB
